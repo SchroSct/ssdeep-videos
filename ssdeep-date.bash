@@ -1,7 +1,6 @@
 #!/bin/bash
 dname="$1"
-
-mapfile -t dirs < <(dirname $(cat ~/path/to/flvlist.txt ) | sort | uniq | grep -i "$dname")
+mapfile -t dirs < <(dirname $(cat ~/foo/bar/flvlist.txt ) | sort | uniq | grep -i -- "$dname")
 let s=0
 for i in "${dirs[@]}"
 do
@@ -14,19 +13,19 @@ do
    tmpdirs[$s]=${tmpdir}
    let s=$s+1
 done
-ssdeep $(find /tmp/ -type f -iname "*.wav" 2>/dev/null) > /tmp/ssdeep.txt
-mapfile -t files < <(find /tmp/ -type f -iname "*.wav" 2>/dev/null)
+ssdeep $(find "${tmpdir}" -type f -iname "*.wav" 2>/dev/null) > /tmp/ssdeep.txt
+mapfile -t files < <(find "${tmpdir}" -type f -iname "*.wav" 2>/dev/null)
 for i in "${files[@]}"
 do
-   mapfile -t matches < <(ssdeep -m /tmp/ssdeep.txt "$i" 2>/dev/null | grep -v "(100)" | cut -d" " -f1,3,4)
+   mapfile -t matches < <(ssdeep -m /tmp/ssdeep.txt "$i" 2>/dev/null | cut -d" " -f1,3,4)
    for m in "${matches[@]}"
    do
       file1=$(basename $(echo "$m" | cut -d" " -f1 | sed -e 's/.wav/.flv/g'))
       file2=$(basename $(echo "$m" | cut -d" " -f2 | sed -e 's/.wav/.flv/g'))
       let chance=$(echo "$m" | cut -d" " -f3 )
-      file1loc=$(grep "$file1" ~/path/to/flvlist.txt | sed -e 's/remove any directory prefixes//g')
-      file2loc=$(grep "$file2" ~/path/to/flvlist.txt | sed -e 's/remove any directory prefixes//g')
-      echo "$file1loc $file2loc $chance"
+      file1loc=$(grep "$file1" ~/foo/bar/flvlist.txt | sed -e 's/remove any directory prefixes//g')
+      file2loc=$(grep "$file2" ~/foo/bar/flvlist.txt | sed -e 's/remove any directory prefixes//g')
+       echo "$file1loc $file2loc $chance"
    done
    sed -i "/$(basename $i)/d" /tmp/ssdeep.txt
 done
